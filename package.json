@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon --exitcrash --ignore cache/ --ignore commands/retiredCommands/ index.js"
+    "dev": "nodemon --exitcrash --ignore cache/ index.js"
   },
   "keywords": [],
   "author": "",

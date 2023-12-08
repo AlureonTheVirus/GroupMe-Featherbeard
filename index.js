@@ -19,9 +19,6 @@ bot.once("ready", async () => { console.log(`WebSocket connected. Hosting webser
 
 
 
-
-
-
 bot.on("ws", async (msg) => {
     let conversationType;
     if (msg.type === "line.create") {
