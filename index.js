@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { port, token, flag } = require("./config.json");
+const { port, flag } = require("./config.json");
 const GroupMe = require("./groupme.js");
       bot = new GroupMe();
 
@@ -16,9 +16,6 @@ for (const file of commands) {
 console.log("All commands Loaded. Awaiting WebSocket connection. . .");
 bot.once("ready", async () => { console.log(`WebSocket connected. Hosting webserver on port: ${port}.`)});
 
-
-
-
 bot.on("ws", async (msg) => {
     let conversationType;
     if (msg.type === "line.create") {
@@ -34,7 +31,6 @@ bot.on("ws", async (msg) => {
     if (!conversationType) return;
     if (msg.subject.sender_type !== "user") return;
     if (msg.subject.user_id === bot.user_id) return;
-
 
     let text = msg.subject.text;
 
@@ -160,7 +156,7 @@ bot.on("ws", async (msg) => {
     }
 });
 
-process.on('SIGINT', signal => {
+process.on('SIGINT', () => {
     console.log(`\nInterrupt detected. Cleaning up. . .`)
     process.exit(0);
 });
