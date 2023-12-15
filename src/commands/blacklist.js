@@ -2,7 +2,7 @@ const axios = require("axios");
 const fs = require('fs');
 
 module.exports = {
-    description : "Adds a member to Sputnik's blacklist via an @mention or a reply to one of their messages. Then it kicks them from the group.",
+    description : "Adds a member to Featherbeard's blacklist via an @mention or a reply. Then kicks them from the group.",
     usage : "!blacklist [user]",
     args : 0,
     roles : "owner",
@@ -10,10 +10,6 @@ module.exports = {
     requiresAuth : 1,
     cooldown: 0,
     execute : async (bot, args, msg) => {
-
-        text = `Blacklisting user(s).`;
-        await bot.send(msg.conversation_id, text, []);
-
         let attachments = msg.attachments;
         let ids = attachments.find(o => o.type === 'mentions');
         let reply = attachments.find(o => o.type === 'reply');
@@ -23,12 +19,16 @@ module.exports = {
             ids = ids.user_ids;
             if (reply) {
                 ids.push(reply.user_id);
+                text = `Off the plank it is!`;
+                await bot.send(msg.conversation_id, text, []);
             }
         } else {
             if (reply) {
                 ids = [reply.user_id];
+                text = `Off the plank it is!`;
+                await bot.send(msg.conversation_id, text, []);
             } else {
-                await bot.send(msg.conversation_id, "No user specified.", [
+                await bot.send(msg.conversation_id, "Ye forgot to name a shipmate!", [
                     {
                         "type": "reply",
                         "reply_id": msg.id,
@@ -51,14 +51,14 @@ module.exports = {
                     reason: `Blacklisted manually by ${msg.name}.`,
                     time: Date.now()
                 }
-                text = `User: "${members[i].name}" was added to the blacklist and will be removed from any group Sputnik helps manage.`;
+                text = `Avast! "${members[i].name}" now be marked on the blacklist, set to be cast away from any crew I aid in managin'. No room for them scallywags on me ship!`;
                 await bot.send(msg.conversation_id, text, []);
             }
         }
 
         fs.writeFileSync("./cache/blacklist.json", JSON.stringify(blacklist, null, 4), 'utf8');
 
-        text = `Blacklisting complete, now removing offending users from the group.`;
+        text = `Blacklisting done. Now haulin' those troublemakers off the ship.`;
         await bot.send(msg.conversation_id, text, []);
 
         let count = 0;
@@ -74,12 +74,16 @@ module.exports = {
             }
         }
 
-        if (fails > count) {
-            text = `There were errors this run. Double check that Sputnik has admin permissions and try using this command again.`;
+        if (fails > 0) {
+            if (fails > count) {
+                text = `Oi! There be some hiccups this run. Make sure I boast admin permissions and give the command another go.`;
+                await bot.send(msg.conversation_id, text, []);
+            }
+            text = `Successfully scrubbed ${count} of ${ids.length} shipmate(s) from the deck. Alas ${fails} fellow sailors(s) resisted removal due to unforseen troubles on the high seas.`;
+            await bot.send(msg.conversation_id, text, []);
+        } else {
+            text = `Successfully scrubbed ${count} of ${ids.length} shipmate(s) from the deck.`;
             await bot.send(msg.conversation_id, text, []);
         }
-
-        text = `Finished removing ${count} of ${ids.length} user(s). Failed to remove ${fails} of ${ids.length} user(s) due to errors.`;
-        await bot.send(msg.conversation_id, text, []);
     }
 };

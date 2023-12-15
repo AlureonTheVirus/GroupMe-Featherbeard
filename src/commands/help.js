@@ -9,7 +9,7 @@ module.exports = {
     requiresAuth : 0,
     cooldown: 0,
     execute : async (bot, args, msg) => {
-        let text = ["My command list is as follows:"];
+        let text = ["Behold! Me list o' commands!"];
         const commands = Object.keys(bot.commands);
         for (const command of commands) {
             if (bot.commands[command].roles !== "dev") {

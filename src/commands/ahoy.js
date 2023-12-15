@@ -1,13 +1,13 @@
 module.exports = {
-    description : "Tests if Sputnik is alive.",
-    usage : "!ping",
+    description : "Tests if Featherbeard is awake and listening.",
+    usage : "!ahoy",
     args : 0,
     roles : "all",
     channels : "all",
     requiresAuth : 0,
-    cooldown: 6000,
+    cooldown: 10000,
     execute : async (bot, args, msg) => {
-        let text = "🏓 Pong!";
+        let text = "Aye! Ahoy there! ☠";
         await bot.send(msg.conversation_id, text, [
             {
                 "type": "reply",

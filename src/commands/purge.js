@@ -6,36 +6,10 @@ const token = helperbottoken;
 const baseurl = "https://api.groupme.com/v3";
 const authedUsers = JSON.parse(fs.readFileSync("./src/cache/connectedUsers.json", 'utf8'));
 
-//var blacklist = JSON.parse(fs.readFileSync("./cache/blacklist.json", 'utf8'));
 var blacklist = {}
 
-async function main() {
-    const res = await axios.get(baseurl+'/groups?token='+token);
-    const groups = res.data.response;
-    for (var i = 0; i < groups.length; i++) {
-        for (var j = 0; j < groups[i].members.length; j++) {
-            blacklist[groups[i].members[j].user_id] = {
-                user_id : groups[i].members[j].user_id,
-                name : groups[i].members[j].name,
-                reason: `Blacklisted automatically due to association with the group ${groups[i].name}.`,
-                time: Date.now()
-            }
-        }
-    }
-    delete blacklist["118825642"]; // helperbot
-    delete blacklist[bot.user_id]; // sputnik
-    delete blacklist["117173298"]; // chey
-
-
-    for (const user in authedUsers) {
-        delete blacklist[user];
-    }
-
-    fs.writeFileSync("./cache/blacklist.json", JSON.stringify(blacklist, null, 4), 'utf8');
-};
-
 module.exports = {
-    description : "Purges all users on Sputnik's blacklist from the group.",
+    description : "Purges all users on Featherbeard's blacklist from the group.",
     usage : "!purge",
     args : 0,
     roles : "owner",
@@ -43,8 +17,31 @@ module.exports = {
     requiresAuth : 1,
     cooldown: 15000,
     execute : async (bot, args, msg) => {
-        await main();
-        let text = `Purging ALL members in my blacklist!`;
+
+        const res = await axios.get(baseurl+'/groups?token='+token);
+            const groups = res.data.response;
+            for (var i = 0; i < groups.length; i++) {
+                for (var j = 0; j < groups[i].members.length; j++) {
+                    blacklist[groups[i].members[j].user_id] = {
+                        user_id : groups[i].members[j].user_id,
+                        name : groups[i].members[j].name,
+                        reason: `Blacklisted automatically due to association with the group ${groups[i].name}.`,
+                        time: Date.now()
+                    }
+                }
+            }
+            delete blacklist["118825642"]; // helperbot
+            delete blacklist[bot.user_id]; // sputnik
+            delete blacklist["117173298"]; // chey
+        
+        
+            for (const user in authedUsers) {
+                delete blacklist[user];
+            }
+        
+            fs.writeFileSync("./src/cache/blacklist.json", JSON.stringify(blacklist, null, 4), 'utf8');
+
+        let text = `Aye aye, Captain! Time to give the order for a grand purge--clearin' the decks of all those blacklisted scoundrels!`;
         await bot.send(msg.conversation_id, text, [
             {
                 "type": "reply",
@@ -73,11 +70,23 @@ module.exports = {
                 }
             }
         }
-        if (count < failedcount) {
-            text = `There were a significant number of failures this run. Try double checking that Sputnik has admin permissions and running the command again.`;
+
+        let total = count + failedcount;
+        if (total > 0) {
+            if (failedcount > 0) {
+                if (failedcount > count) {
+                    text = `Oi! There be some hiccups this run. Make sure I boast admin permissions and give the command another go.`;
+                    await bot.send(msg.conversation_id, text, []);
+                }
+                text = `Successfully scrubbed ${count} of ${total} shipmate(s) from the deck. Alas ${failedcount} fellow sailors(s) resisted removal due to unforseen troubles on the high seas.`;
+                await bot.send(msg.conversation_id, text, []);
+            } else {
+                text = `Successfully scrubbed ${count} of ${total} shipmate(s) from the deck.`;
+                await bot.send(msg.conversation_id, text, []);
+            }
+        } else {
+            text = `Arr matey, it be a calm sea for now--no blacklisted scallywags in sight to remove. Give it another shot when the tides be more turbulent!`;
             await bot.send(msg.conversation_id, text, []);
         }
-        text = `Purge complete. ${count} user(s) removed. failed to remove ${failedcount} blacklisted user(s).`;
-        await bot.send(msg.conversation_id, text, []);
     }
 };

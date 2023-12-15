@@ -15,16 +15,28 @@ module.exports = {
             let def = response.data.list[0].definition.replace(/[\[\]]/g, '');
             let word = response.data.list[0].word.replace(/[\[\]]/g, '');
             let example = response.data.list[0].example.replace(/[\[\]]/g, '');
-            let text = `The definition of '${word}' (...according to Urban Dictionary):\n${def}\n\nExamples:\n${example}`
-            await bot.send(msg.conversation_id, text, [
-                {
-                    "type": "reply",
-                    "reply_id": msg.id,
-                    "base_reply_id": msg.id,
-                }
-            ]);
+            let text = `This be the definition of '${word}'! (...according to Urban Dictionary)\n${def}\n\nExamples:\n${example}`
+            if (text.length < 1000) {
+                await bot.send(msg.conversation_id, text, [
+                    {
+                        "type": "reply",
+                        "reply_id": msg.id,
+                        "base_reply_id": msg.id,
+                    }
+                ]);
+            } else {
+                text = `Arr, the definition of ${query} be a lengthly tale fit for ye own exploration on the Urban Dictionary seas. Dive into the depths there to uncover it's meaning, me curious shipmate!`
+                await bot.send(msg.conversation_id, text, [
+                    {
+                        "type": "reply",
+                        "reply_id": msg.id,
+                        "base_reply_id": msg.id,
+                    }
+                ]);  
+            }
+
         } else {
-            let text = `'${query}' doesn't seem to have a definition on Urban Dictionary.`
+            let text = `Ahoy! It appears that the term '${query}' be missing from the Urban Dictionary. No traces of the word in these waters.`
             await bot.send(msg.conversation_id, text, [
                 {
                     "type": "reply",

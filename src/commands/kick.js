@@ -1,5 +1,5 @@
 module.exports = {
-    description : "Kicks a member from the group via an @mention or a reply to one of their messages.",
+    description : "Kicks a member from the group via an @mention or a reply.",
     usage : "!kick [user]",
     args : 0,
     roles : ["admin", "owner"],
@@ -20,7 +20,7 @@ module.exports = {
             if (reply) {
                 ids = [reply.user_id];
             } else {
-                await bot.send(msg.conversation_id, "No user specified.", [
+                await bot.send(msg.conversation_id, "Ye forgot to name a shipmate!", [
                     {
                         "type": "reply",
                         "reply_id": msg.id,
@@ -45,12 +45,16 @@ module.exports = {
             }
         }
 
-        if (fails > count) {
-            text = `There were errors this run. Double check that Sputnik has admin permissions and try using this command again.`;
+        if (fails > 0) {
+            if (fails > count) {
+                text = `Oi! There be some hiccups this run. Make sure I boast admin permissions and give the command another go.`;
+                await bot.send(msg.conversation_id, text, []);
+            }
+            text = `Successfully scrubbed ${count} of ${ids.length} shipmate(s) from the deck. Alas ${fails} fellow sailors(s) resisted removal due to unforseen troubles on the high seas.`;
+            await bot.send(msg.conversation_id, text, []);
+        } else {
+            text = `Successfully scrubbed ${count} of ${ids.length} shipmate(s) from the deck.`;
             await bot.send(msg.conversation_id, text, []);
         }
-
-        text = `Finished removing ${count} of ${ids.length} user(s). Failed to remove ${fails} of ${ids.length} user(s) due to errors.`;
-        await bot.send(msg.conversation_id, text, []);
     }
 };

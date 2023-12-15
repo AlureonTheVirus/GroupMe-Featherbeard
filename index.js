@@ -152,17 +152,17 @@ bot.on("ws", async (msg) => {
         msg.subject.conversationType = "group";
         msg.subject.conversation_id = msg.subject.group_id;
         if (!msg.subject.parent_id) msg.subject.parent_id = msg.subject.group_id;
-    }
-    if (msg.type === "direct_message.create") {
+    } else if (msg.type === "direct_message.create") {
         msg.subject.conversationType = "dm"
         msg.subject.conversation_id = msg.subject.chat_id;
         if (!msg.subject.parent_id) msg.subject.parent_id = msg.subject.chat_id;
-    }
-
-    if (!msg.subject.text || !msg.subject.conversationType) return;
+    } else return;
+    
+    if (!msg.subject.conversationType) return;
     if (msg.subject.sender_type !== "user") return;
     if (msg.subject.user_id === bot.user_id) return;
-
+    if (!msg.subject.text) return;
+    
     if (msg.subject.text.startsWith(flag)) {
         await commandHandler(msg);
     } else {   

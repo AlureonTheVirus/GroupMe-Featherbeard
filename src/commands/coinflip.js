@@ -1,5 +1,5 @@
 module.exports = {
-    description : "Flips a coin.",
+    description : "Flips Featherbeard's lucky doubloon.",
     usage : "!coinflip",
     args : 0,
     roles : "all",
@@ -7,9 +7,9 @@ module.exports = {
     requiresAuth : 0,
     cooldown: 5000,
     execute : async (bot, args, msg) => {
-        let text = "It's Tails!";
+        let text = "Aye! It be TAILS!";
         if (Math.random() >= .5) {
-            text = "It's Heads!";
+            text = "Aye! It be HEADS!";
         }
         await bot.send(msg.conversation_id, text, [
             {

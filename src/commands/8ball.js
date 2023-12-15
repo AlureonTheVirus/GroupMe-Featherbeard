@@ -104,7 +104,7 @@ module.exports = {
 
         let text;
         if (args.some(element => bannedWords.includes(element.toLowerCase().replace(/[^a-zA-Z0-9]/g, '')))) {
-            text = "Sorry, I can't answer questions that are rude or pertain to violence or self-harm."
+            text = "Apologies me heartie, but I can't entertain queries that be rude or touch upon violence or harm to oneself. Lets keep the seas civil and shipshape, aye?"
             await bot.send(msg.conversation_id, text, [
                 {
                     "type": "reply",
@@ -127,7 +127,7 @@ module.exports = {
             }
         }
 
-        text = `🎱 ${response}`;
+        text = `*Shakes the 8 ball* Aye, me magic ball be sayin': "${response}" 🎱.`;
         await bot.send(msg.conversation_id, text, [
             {
                 "type": "reply",

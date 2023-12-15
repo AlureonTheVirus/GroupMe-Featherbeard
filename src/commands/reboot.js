@@ -1,5 +1,5 @@
 module.exports = {
-    description : "Reboots Sputnik in the case of a critical error.",
+    description : "Reboots Featherbeard in the case of a critical error.",
     usage : "!reboot",
     args : 0,
     roles : "dev",
@@ -7,7 +7,7 @@ module.exports = {
     requiresAuth : 1,
     cooldown: 6000,
     execute : async (bot, args, msg) => {
-        let text = "Rebooting! See you on the other side.";
+        let text = "Rebooting! Catch you on the flipside of this digital sea!.";
         await bot.send(msg.conversation_id, text, [
             {
                 "type": "reply",

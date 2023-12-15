@@ -135,7 +135,7 @@ module.exports = class extends events.EventEmitter {
 			};
 		});
 
-		app.use(express.static(path.join(__dirname, 'src/public')));
+		app.use(express.static(path.join(__dirname, '/public')));
 		app.listen(port, () => {});
 	}
 	send = async (conversation_id, text, attachments) => {

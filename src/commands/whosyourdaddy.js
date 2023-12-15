@@ -7,9 +7,9 @@ module.exports = {
     requiresAuth : 0,
     cooldown: 5000,
     execute : async (bot, args, msg) => {
-        let text = "I'm designed and maintained by a user who goes by the name 'alureon'.";
+        let text = "I be crafted and kept shipshape by the skilled hand of Captain Isaac Stanger, you may also know him as 'alureon'. If ye wish to parley with him, send a DM here: https://groupme.com/contact/93645911/a2jufjEF";
         if (msg.sender_id === "93645911") {
-            text = "You of course!";
+            text = "Why, ye be the mighty captain steerin' me ship, of course! Arrr, the helm be in capable hands!!";
         }
         await bot.send(msg.conversation_id, text, [
             {
