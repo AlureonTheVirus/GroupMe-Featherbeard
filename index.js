@@ -1,47 +1,31 @@
 const fs = require('fs');
 const { port, flag } = require("./config.json");
-const GroupMe = require("./groupme.js");
-      bot = new GroupMe();
+const GroupMe = require("./src/groupme.js");
+const bot = new GroupMe();
 
-var blacklist = JSON.parse(fs.readFileSync("./cache/blacklist.json", 'utf8'));
-
-bot.commands = {};
-bot.cooldowns = {};
-
-console.log("Loading commands. . .");
-const commands = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
-for (const file of commands) {
-    bot.commands[`${file.split(".")[0]}`] = require(`./commands/${file}`);
-}
-console.log("All commands Loaded. Awaiting WebSocket connection. . .");
-bot.once("ready", async () => { console.log(`WebSocket connected. Hosting webserver on port: ${port}.`)});
-
-bot.on("ws", async (msg) => {
-    let conversationType;
-    if (msg.type === "line.create") {
-        conversationType = "group";
-        msg.subject.conversation_id = msg.subject.group_id;
-        if (!msg.subject.parent_id) msg.subject.parent_id = msg.subject.group_id;
+const init = async () => {
+    console.log("Loading commands. . .");
+    const commands = fs.readdirSync("./src/commands").filter(file => file.endsWith(".js") || file.endsWith(".mjs"));
+    for (const file of commands) {
+        if (file.endsWith(".mjs")) {
+            bot.commands[`${file.split(".")[0]}`] = await import(`./src/commands/${file}`);
+        } else {
+            bot.commands[`${file.split(".")[0]}`] = require(`./src/commands/${file}`);
+        }
     }
-    if (msg.type === "direct_message.create") {
-        conversationType = "dm"
-        msg.subject.conversation_id = msg.subject.chat_id;
-        if (!msg.subject.parent_id) msg.subject.parent_id = msg.subject.chat_id;
-    }
-    if (!conversationType) return;
-    if (msg.subject.sender_type !== "user") return;
-    if (msg.subject.user_id === bot.user_id) return;
+    console.log("All commands Loaded. Awaiting WebSocket connection. . .");
+    bot.once("ready", async () => { 
+        console.log(`WebSocket connected. Hosting webserver on port: ${port}.`);
+    });
+};
 
-    let text = msg.subject.text;
-
-    if (!text) return;
-    if (!text.startsWith(flag)) return;
-    let command = text.slice(1).split(" ")[0];
-    let args = text.slice(1).split(" ").slice(1);
+const commandHandler = async (msg) => {
+    let command = msg.subject.text.slice(1).split(" ")[0];
+    let args = msg.subject.text.slice(1).split(" ").slice(1);
 
     let targetCommand = bot.commands[command];
     if (!targetCommand) {
-        let text = `Sorry! The command '${flag}${command}' doesn't exist. Double check your spelling or use '${flag}help' for a list of my commands.`;
+        let text = `Ahoy there, matey! Seems ye be sailin' uncharted waters with that command, '${flag}${command}'. Double check yer map, or hoist the '${flag}help' flag and I'll show ye the ropes.`;
         await bot.send(msg.subject.conversation_id, text, [
             {
                 "type": "reply",
@@ -54,7 +38,7 @@ bot.on("ws", async (msg) => {
     if (bot.cooldowns[msg.subject.user_id]) {
         if (bot.cooldowns[msg.subject.user_id][command]) {
             if (bot.cooldowns[msg.subject.user_id][command] > Date.now()) {
-                let text = `You're on cooldown. Please wait ${(bot.cooldowns[msg.subject.user_id][command] - Date.now())/1000} more seconds to use '${flag}${command}' again.`;
+                let text = `Belay that order, scallywag! Yer cannons be overheated, cool 'em down for another ${(bot.cooldowns[msg.subject.user_id][command] - Date.now())/1000} seconds before ye fire '${flag}${command}' again.`
                 await bot.send(msg.subject.conversation_id, text, [
                     {
                         "type": "reply",
@@ -72,7 +56,7 @@ bot.on("ws", async (msg) => {
     }
     if (targetCommand.requiresAuth) {
         if (!await bot.verifyAuthStatus(msg.subject.user_id)) {
-            let text = `Sorry! '${flag}${command}' requires a Sputnik account to use. Authorize me with your GroupMe account to add me to any of your groups and get access to certain commands. You can start by signing up here: https://sputnik.alureon.dev/auth.`;
+            let text = `Arrr! Apologies, me heartie! It seems ye haven't hoisted yer colors on this ship. Forge a Featherbeard account in order to use '${flag}${command}' and sail forth on this digital sea!`
             await bot.send(msg.subject.conversation_id, text, [
                 {
                     "type": "reply",
@@ -83,8 +67,8 @@ bot.on("ws", async (msg) => {
             return;
         }
     } else {
-        if (blacklist.hasOwnProperty(msg.subject.user_id)) {
-            let text = `You have been blacklisted from using Sputnik. Contact the developer if you believe this was a mistake.`;
+        if (bot.blacklist.hasOwnProperty(msg.subject.user_id)) {
+            let text = `Ye be castin' a shadow on the horizon, for ye have been BLACKLISTED from the realm of Featherbeard. If ye reckon this be a mistake, send word to the developer to plead yer case.`;
             await bot.send(msg.subject.conversation_id, text, [
                 {
                     "type": "reply",
@@ -96,12 +80,12 @@ bot.on("ws", async (msg) => {
         }
     }
     if (targetCommand.channels !== "all") {
-        if (!targetCommand.channels.includes(conversationType)) {
+        if (!targetCommand.channels.includes(msg.subject.conversationType)) {
             let text;
-            if (conversationType === "dm") {
-                text = `Sorry! That command can only be used in a group.`;
+            if (msg.subject.conversationType === "dm") {
+                text = `Arrr! Apologies, me hearty! That decree be only fit for execution within the confines of a crew. (You have to be in a group to use this command.)`;
             } else {
-                text = `Sorry! That command can only be used in my DMs.`;
+                text = `Arrr! Apologies, shipmate! That order be exclusive to me private messages.`;
             }
             await bot.send(msg.subject.conversation_id, text, [
                 {
@@ -117,7 +101,7 @@ bot.on("ws", async (msg) => {
         let senderRole = await bot.fetchPermissions(msg.subject.conversation_id, msg.subject.user_id);
         if (senderRole !== "dev") {
             if (!targetCommand.roles.includes(senderRole) || targetCommand.roles === "internal") {
-                let text = `Sorry! It looks like you dont have the correct permissions to use that command.`;
+                let text = `Arrr! Avast, ye scallywag! Apologies, but ye lack the proper permissions in this motley crew to wield that command!`;
                 await bot.send(msg.subject.conversation_id, text, [
                     {
                         "type": "reply",
@@ -130,7 +114,7 @@ bot.on("ws", async (msg) => {
         }
     }
     if (args < targetCommand.args) {
-        let text = `That command was valid but is missing some arguments. Usage: ${targetCommand.usage}`;
+        let text = `Avast ye! That directive be proper, but it be lackin' in some essential details. Follow the correct format, matey! (Usage: ${targetCommand.usage}).`
         await bot.send(msg.subject.conversation_id, text, [
             {
                 "type": "reply",
@@ -140,11 +124,10 @@ bot.on("ws", async (msg) => {
         ]);
         return;
     }
-
     try {
         await bot.commands[command].execute(bot, args, msg.subject);
     } catch (err) {
-        let text = "Unfortunately that command failed to execute. You may have stumbled on a bug. Contact the developer to report this so that hopefully it never happens in the future."
+        let text = "Arrr! Unluckily, that command failed to set sail. Ye might've encountered a bug in the code. Dispatch a missive to the developer, savvy? Mayhaps they'll mend the glitch, ensuring it never plagues us again in the future."
         await bot.send(msg.subject.conversation_id, text, [
             {
                 "type": "reply",
@@ -154,9 +137,42 @@ bot.on("ws", async (msg) => {
         ]);
         console.log("Bot failed with error:", err);
     }
+}
+
+const msgHandler = async (msg) => {
+    if (msg.subject.conversationType === "group") {
+
+    } else if (msg.subject.conversationType === "dm") {
+
+    }
+}
+
+bot.on("ws", async (msg) => {
+    if (msg.type === "line.create") {
+        msg.subject.conversationType = "group";
+        msg.subject.conversation_id = msg.subject.group_id;
+        if (!msg.subject.parent_id) msg.subject.parent_id = msg.subject.group_id;
+    }
+    if (msg.type === "direct_message.create") {
+        msg.subject.conversationType = "dm"
+        msg.subject.conversation_id = msg.subject.chat_id;
+        if (!msg.subject.parent_id) msg.subject.parent_id = msg.subject.chat_id;
+    }
+
+    if (!msg.subject.text || !msg.subject.conversationType) return;
+    if (msg.subject.sender_type !== "user") return;
+    if (msg.subject.user_id === bot.user_id) return;
+
+    if (msg.subject.text.startsWith(flag)) {
+        await commandHandler(msg);
+    } else {   
+        await msgHandler(msg);   
+    }
 });
 
 process.on('SIGINT', () => {
-    console.log(`\nInterrupt detected. Cleaning up. . .`)
+    console.log(`\nInterrupt detected. Cleaning up. . .`);
     process.exit(0);
 });
+
+init();

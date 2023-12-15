@@ -1,17 +1,23 @@
 const axios = require("axios");
+const fs = require('fs');
 
 module.exports = {
-    description : "Kicks a member from the group via an @mention or a reply to one of their messages.",
-    usage : "!kick [user]",
+    description : "Adds a member to Sputnik's blacklist via an @mention or a reply to one of their messages. Then it kicks them from the group.",
+    usage : "!blacklist [user]",
     args : 0,
-    roles : ["admin", "owner"],
+    roles : "owner",
     channels : "group",
     requiresAuth : 1,
     cooldown: 0,
     execute : async (bot, args, msg) => {
+
+        text = `Blacklisting user(s).`;
+        await bot.send(msg.conversation_id, text, []);
+
         let attachments = msg.attachments;
         let ids = attachments.find(o => o.type === 'mentions');
         let reply = attachments.find(o => o.type === 'reply');
+        let blacklist = JSON.parse(fs.readFileSync("./cache/blacklist.json", 'utf8'));
 
         if (ids) {
             ids = ids.user_ids;
@@ -33,6 +39,27 @@ module.exports = {
             }
         }
         ids = Array.from(ids, x => `${x}`);
+
+        const { data } = await axios.get(`https://api.groupme.com/v3/groups/${msg.parent_id}?token=${bot.token}`);
+        const members = data.response.members;
+
+        for (let i = 0; i < members.length; i++) {
+            if (ids.includes(members[i].user_id)) {
+                blacklist[members[i].user_id] = {
+                    user_id: members[i].user_id,
+                    name: members[i].name,
+                    reason: `Blacklisted manually by ${msg.name}.`,
+                    time: Date.now()
+                }
+                text = `User: "${members[i].name}" was added to the blacklist and will be removed from any group Sputnik helps manage.`;
+                await bot.send(msg.conversation_id, text, []);
+            }
+        }
+
+        fs.writeFileSync("./cache/blacklist.json", JSON.stringify(blacklist, null, 4), 'utf8');
+
+        text = `Blacklisting complete, now removing offending users from the group.`;
+        await bot.send(msg.conversation_id, text, []);
 
         let count = 0;
         let fails = 0;

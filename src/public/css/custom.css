@@ -3,6 +3,7 @@
     --primary-hover: #72de92;
     --background-color: #1a1a1a;
     --line-height: 1.25;
+    --card-sectionning-background-color: #313131;
 }
 
 @media (min-width: 671px) {

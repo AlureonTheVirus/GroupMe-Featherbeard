@@ -162,7 +162,6 @@ async function verify() {
 }
 
 function rejectVerify() {
-
 }
 
 async function sendAnotherText() {

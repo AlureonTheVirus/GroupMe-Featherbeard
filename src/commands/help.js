@@ -1,4 +1,4 @@
-const { flag } = require("../config.json");
+const { flag } = require("../../config.json");
 
 module.exports = {
     description : "Shows this message.",

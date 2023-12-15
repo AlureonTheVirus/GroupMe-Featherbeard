@@ -8,10 +8,10 @@ const express = require('express'),
 const expressCookieParser = require('cookie-parser');
 const cookieParser = require('set-cookie-parser');
 const url = require('url');
-const { port, token } = require("./config.json");
+const { port, token } = require("../config.json");
 
-userCachePath = "./cache/connectedUsers.json";
-blacklistPath = "./cache/blacklist.json";
+userCachePath = "./src/cache/connectedUsers.json";
+blacklistPath = "./src/cache/blacklist.json";
 
 module.exports = class extends events.EventEmitter {
 	constructor() {
@@ -26,6 +26,7 @@ module.exports = class extends events.EventEmitter {
 		let groupsList = await axios.get(`https://api.groupme.com/v3/groups?omit=memberships&token=${token}`);
 		let directMessagesList = await axios.get(`https://api.groupme.com/v3/chats?token=${token}`);
 		this.user_id = me.data.response.user_id;
+		this.name = me.data.response.name;
 		this.groups = groupsList.data.response;
 		this.directMessages = directMessagesList.data.response;
 
@@ -134,10 +135,9 @@ module.exports = class extends events.EventEmitter {
 			};
 		});
 
-		app.use(express.static(path.join(__dirname, 'public')));
+		app.use(express.static(path.join(__dirname, 'src/public')));
 		app.listen(port, () => {});
 	}
-
 	send = async (conversation_id, text, attachments) => {
 		try {
 			if (conversation_id.includes("+") || conversation_id.includes("_")) {
@@ -178,11 +178,11 @@ module.exports = class extends events.EventEmitter {
 					});
 					success = true;
 				} catch {
-					throw `Sputnik does not have sufficiant permissions to remove ${members[i].name}.`;
+					throw `Featherbeard does not have sufficiant permissions to remove ${members[i].name}.`;
 				};
 			}
 		}
-		if (!success) throw "Sputnik could not find a user in the group matching one of the targets.";
+		if (!success) throw "Featherbeard could not find a user in the group matching one of the targets.";
 	}
 	removeMember = async (conversation_id, member_id) => {
 		let success = false;
@@ -192,11 +192,18 @@ module.exports = class extends events.EventEmitter {
 			});
 			success = true;
 		} catch {
-			throw `Sputnik does not have sufficiant permissions to remove a member.`;
+			throw `Featherbeard does not have sufficiant permissions to remove a member.`;
 		};
-		if (!success) throw "Sputnik could not find a user in the group matching one of the targets.";
+		if (!success) throw "Featherbeard could not find a user in the group matching one of the targets.";
 	}
-
+	getMessageById = async (conversation_id, message_id) => {
+		try {
+			let res = await axios.get(`https://api.groupme.com/v3/groups/${conversation_id}/messages/${message_id}?token=${this.token}`);
+			return res.data.response.message;
+		} catch (err) {
+			console.error(err);
+		}
+	}
 	authUser = (id, name, token) => {
 		this.authedUsers[`${id}`] = {
 			name : name,
@@ -204,7 +211,6 @@ module.exports = class extends events.EventEmitter {
 		};
 		this.syncConnectedUsers();
 	};
-
 	verifyAuthStatus = async (id) => {
 		if (!this.authedUsers[`${id}`]) return false;
 		let validUser = await this.verifyToken(this.authedUsers[`${id}`].token);
@@ -220,7 +226,6 @@ module.exports = class extends events.EventEmitter {
 			await this.verifyAuthStatus(user);
 		}
 	}
-
 	verifyToken = async (token) => {
 		let user;
 		try {
@@ -242,9 +247,12 @@ module.exports = class extends events.EventEmitter {
 			return "member";
 		} catch {}
 	};
-	authedUsers = JSON.parse(fs.readFileSync(userCachePath, 'utf8'));
-	blacklist = JSON.parse(fs.readFileSync(blacklistPath, 'utf8'));
 	syncConnectedUsers = () => {
 		fs.writeFileSync(userCachePath, JSON.stringify(this.authedUsers, null, 2), 'utf8')
 	};
+	authedUsers = JSON.parse(fs.readFileSync(userCachePath, 'utf8'));
+	blacklist = JSON.parse(fs.readFileSync(blacklistPath, 'utf8'));
+	commands = {};
+	cooldowns = {};
+	axios = axios;
 }

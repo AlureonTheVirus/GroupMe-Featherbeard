@@ -1,10 +1,10 @@
 const axios = require("axios");
 const fs = require('fs');
-const { flag, helperbottoken } = require("../config.json");
+const { helperbottoken } = require("../../config.json");
 
 const token = helperbottoken;
 const baseurl = "https://api.groupme.com/v3";
-const authedUsers = JSON.parse(fs.readFileSync("./cache/connectedUsers.json", 'utf8'));
+const authedUsers = JSON.parse(fs.readFileSync("./src/cache/connectedUsers.json", 'utf8'));
 
 //var blacklist = JSON.parse(fs.readFileSync("./cache/blacklist.json", 'utf8'));
 var blacklist = {}
@@ -23,7 +23,9 @@ async function main() {
         }
     }
     delete blacklist["118825642"]; // helperbot
-    delete blacklist["116121837"]; // sputnik
+    delete blacklist[bot.user_id]; // sputnik
+    delete blacklist["117173298"]; // chey
+
 
     for (const user in authedUsers) {
         delete blacklist[user];
