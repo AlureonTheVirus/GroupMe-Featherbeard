@@ -56,7 +56,7 @@ const commandHandler = async (msg) => {
     }
     if (targetCommand.requiresAuth) {
         if (!await bot.verifyAuthStatus(msg.subject.user_id)) {
-            let text = `Arrr! Apologies, me heartie! It seems ye haven't hoisted yer colors on this ship. Forge a Featherbeard account in order to use '${flag}${command}' and sail forth on this digital sea!`
+            let text = `Arrr! Apologies, me heartie! It seems ye haven't hoisted yer colors on this ship. Forge a Featherbeard account in order to use '${flag}${command}' and sail forth on this digital sea! Here's the link to get started: https://featherbeard.alureon.dev/auth/`
             await bot.send(msg.subject.conversation_id, text, [
                 {
                     "type": "reply",
