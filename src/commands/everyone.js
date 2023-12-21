@@ -9,17 +9,18 @@ module.exports = {
     requiresAuth : 1,
     cooldown: 15000,
     execute : async (bot, args, msg) => {
+        const message = args.join(" ");
         let members = [];
         let loci = [];
-        let { data } = await axios.get(`https://api.groupme.com/v3/groups/${msg.conversation_id}?token=${bot.token}`);
-        let memberList = data.response.members;
+        const { data } = await axios.get(`https://api.groupme.com/v3/groups/${msg.conversation_id}?token=${bot.token}`);
+        const memberList = data.response.members;
 
         for (let i = 0; i < memberList.length; i++) {
             members.push(memberList[i].user_id);
             loci.push([10, 18]);
         }
 
-        await bot.send(msg.conversation_id, "Attention @everyone! ^^", [
+        await bot.send(msg.conversation_id, `Attention @everyone, ${msg.name} has made an announcement! Here it is:\n\n"${message}"`, [
             {
                 "type": "reply",
                 "reply_id": msg.id,

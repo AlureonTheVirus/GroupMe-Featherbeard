@@ -1,6 +1,6 @@
 module.exports = {
     description : "Kicks a member from the group via an @mention or a reply.",
-    usage : "!kick [user]",
+    usage : "!kick [@mention/reply]",
     args : 0,
     roles : ["admin", "owner"],
     channels : "group",
@@ -31,6 +31,11 @@ module.exports = {
             }
         }
         ids = Array.from(ids, x => `${x}`);
+
+        if (ids.includes(bot.user_id)) {
+            text = `Ye can't heave-ho Featherbeard off the plank of this here group. This ol' pengin pirate be stayin' put!`;
+            await bot.send(msg.conversation_id, text, []); 
+        }
 
         let count = 0;
         let fails = 0;

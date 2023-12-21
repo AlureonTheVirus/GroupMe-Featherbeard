@@ -50,8 +50,11 @@ module.exports = {
             }
         ]);
 
+        let changes = ["A summery of purged users are as follows:\n"];
+
         const { data } = await axios.get(baseurl+`/groups/${msg.parent_id}?token=`+bot.token);
         const members = data.response.members;
+
         let count = 0;
         let failedcount = 0;
         for (const user in blacklist) {
@@ -61,10 +64,11 @@ module.exports = {
                         await axios.post(`${baseurl}/groups/${msg.parent_id}/members/${members[i].id}/remove?token=${bot.token}`, {
                             membership_id : members[i].id
                         });
+
+                        changes.push(`• Removed ${members[i].name}. Reason: ${blacklist[user].reason}.`);
                         count++;
                     } catch {
-                        text = `Failed to remove user: '${blacklist[user].name}'.`;
-                        await bot.send(msg.conversation_id, text, []);
+                        changes.push(`• Failed to remove user: '${blacklist[user].name}'.`);
                         failedcount++;
                     }
                 }
@@ -74,16 +78,13 @@ module.exports = {
         let total = count + failedcount;
         if (total > 0) {
             if (failedcount > 0) {
-                if (failedcount > count) {
-                    text = `Oi! There be some hiccups this run. Make sure I boast admin permissions and give the command another go.`;
-                    await bot.send(msg.conversation_id, text, []);
-                }
-                text = `Successfully scrubbed ${count} of ${total} shipmate(s) from the deck. Alas ${failedcount} fellow sailors(s) resisted removal due to unforseen troubles on the high seas.`;
+                text = `Successfully scrubbed ${count} of ${total} shipmate(s) from the deck. Alas ${failedcount} fellow sailors(s) resisted removal due to unforseen troubles on the high seas. (Make sure Featherbeard has admin permissions and that the blacklisted users are not also admins in the chat.)`;
                 await bot.send(msg.conversation_id, text, []);
             } else {
                 text = `Successfully scrubbed ${count} of ${total} shipmate(s) from the deck.`;
                 await bot.send(msg.conversation_id, text, []);
             }
+            await bot.send(msg.conversation_id, changes.join("\n"), []);
         } else {
             text = `Arr matey, it be a calm sea for now--no blacklisted scallywags in sight to remove. Give it another shot when the tides be more turbulent!`;
             await bot.send(msg.conversation_id, text, []);

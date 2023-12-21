@@ -2,8 +2,8 @@ const axios = require("axios");
 const fs = require('fs');
 
 module.exports = {
-    description : "Adds a member to Featherbeard's blacklist via an @mention or a reply. Then kicks them from the group.",
-    usage : "!blacklist [user]",
+    description : "Adds a member to Featherbeard's blacklist. Then kicks them from the group.",
+    usage : "!blacklist [@mention/reply]",
     args : 0,
     roles : "owner",
     channels : "group",
@@ -13,7 +13,7 @@ module.exports = {
         let attachments = msg.attachments;
         let ids = attachments.find(o => o.type === 'mentions');
         let reply = attachments.find(o => o.type === 'reply');
-        let blacklist = JSON.parse(fs.readFileSync("./cache/blacklist.json", 'utf8'));
+        let blacklist = JSON.parse(fs.readFileSync("./src/cache/blacklist.json", 'utf8'));
 
         if (ids) {
             ids = ids.user_ids;
@@ -40,6 +40,11 @@ module.exports = {
         }
         ids = Array.from(ids, x => `${x}`);
 
+        if (ids.includes(bot.user_id)) {
+            text = `Avast ye! No blacklisting this ol' feathered pirate from the crew!`;
+            await bot.send(msg.conversation_id, text, []); 
+        }
+
         const { data } = await axios.get(`https://api.groupme.com/v3/groups/${msg.parent_id}?token=${bot.token}`);
         const members = data.response.members;
 
@@ -56,7 +61,7 @@ module.exports = {
             }
         }
 
-        fs.writeFileSync("./cache/blacklist.json", JSON.stringify(blacklist, null, 4), 'utf8');
+        fs.writeFileSync("./src/cache/blacklist.json", JSON.stringify(blacklist, null, 4), 'utf8');
 
         text = `Blacklisting done. Now haulin' those troublemakers off the ship.`;
         await bot.send(msg.conversation_id, text, []);

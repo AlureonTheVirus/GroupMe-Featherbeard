@@ -24,7 +24,7 @@ const commandHandler = async (msg) => {
     let args = msg.subject.text.slice(1).split(" ").slice(1);
 
     let targetCommand = bot.commands[command];
-    if (!targetCommand) {
+    if (!targetCommand || targetCommand.roles === "internal") {
         let text = `Ahoy there, matey! Seems ye be sailin' uncharted waters with that command, '${flag}${command}'. Double check yer map, or hoist the '${flag}help' flag and I'll show ye the ropes.`;
         await bot.send(msg.subject.conversation_id, text, [
             {
@@ -98,9 +98,9 @@ const commandHandler = async (msg) => {
         }
     }
     if (targetCommand.roles !== "all") {
-        let senderRole = await bot.fetchPermissions(msg.subject.conversation_id, msg.subject.user_id);
+        let senderRole = await bot.fetchPermissions(msg.subject.parent_id, msg.subject.user_id);
         if (senderRole !== "dev") {
-            if (!targetCommand.roles.includes(senderRole) || targetCommand.roles === "internal") {
+            if (!targetCommand.roles.includes(senderRole)) {
                 let text = `Arrr! Avast, ye scallywag! Apologies, but ye lack the proper permissions in this motley crew to wield that command!`;
                 await bot.send(msg.subject.conversation_id, text, [
                     {
@@ -143,7 +143,31 @@ const msgHandler = async (msg) => {
     if (msg.subject.conversationType === "group") {
 
     } else if (msg.subject.conversationType === "dm") {
+        let text = `Alas, I be unable to chatter in direct messages like ye can. Cast the '!help' command for a list of actions ye can command, or unleash !setup if ye be fancyin' to enlist me in any of yer crews (To add me to a group). Fair seas, me mate!`
+        await bot.send(msg.subject.conversation_id, text, [
+            {
+                "type": "reply",
+                "reply_id": msg.subject.id,
+                "base_reply_id": msg.subject.id
+            }
+        ]);
+    }
+}
 
+const addedToGroupHandler = async (msg) => {
+    if (!await bot.verifyAuthStatus(await bot.fetchOwnerId(msg.id))) {
+        let text = `Ahoy, ye scallywag! It seems ye tossed me into yer group without settin' up and linkin' a Featherbeard account to GroupMe! Ye best be takin' care of that matter before I can join the crew. Sail over to any group where ye already spotted me and holler '!setup,' or use me share link through the secret whispers of direct messages. Get it shipshape, and we'll be sailin' the digital seas together! https://groupme.com/contact/116121837/IGs6jOkA`
+        await bot.send(msg.id, text, []);
+    } else {
+        try {
+            await bot.elevatePermissions(msg.id);
+        } catch (err) {
+            console.error(err);
+            let text = "Shiver me timbers! It seems the gears in me machinery be grindin' to a halt. Unfortunately, I couldn't hoist meself up to the rank of admin on me own. Ye'll have to take the helm on this one and promote me manually. Give the order to raise me flag to the top -- make me admin, Captain!";
+            await bot.send(msg.id, text, []);
+        }
+        let text = `Ahoy there, me hearties! I be Captain Featherbeard, the swashbucklin' penguin of moderation and group wranglin'! Delighted to set sail with yer fine crew! Give a squawk to '!help' if ye be needin' a map of me commands. Add me to any other group you have with '!setup' Fair winds and following seas, me mateys!`
+        await bot.send(msg.id, text, []);
     }
 }
 
@@ -156,7 +180,13 @@ bot.on("ws", async (msg) => {
         msg.subject.conversationType = "dm"
         msg.subject.conversation_id = msg.subject.chat_id;
         if (!msg.subject.parent_id) msg.subject.parent_id = msg.subject.chat_id;
-    } else return;
+    } else if (msg.type === "membership.create") {
+        await addedToGroupHandler(msg.subject);
+        return;
+    } else {
+        //console.log(msg);
+        return;
+    };
     
     if (!msg.subject.conversationType) return;
     if (msg.subject.sender_type !== "user") return;

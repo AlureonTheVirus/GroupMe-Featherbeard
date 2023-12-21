@@ -61,7 +61,7 @@ module.exports = class extends events.EventEmitter {
 		}
 
 		this.emit("ready")
-	}
+	};
 	#initWebserver = async () => {
 		app.use(expressCookieParser());
 		app.use(express.json());
@@ -137,33 +137,159 @@ module.exports = class extends events.EventEmitter {
 
 		app.use(express.static(path.join(__dirname, '/public')));
 		app.listen(port, () => {});
-	}
-	send = async (conversation_id, text, attachments) => {
-		try {
-			if (conversation_id.includes("+") || conversation_id.includes("_")) {
-				await axios.post(`https://api.groupme.com/v3/direct_messages?token=${token}`, {
-					"direct_message": {
-						"source_guid": `GUID${Date.now()}`,
-						"recipient_id": conversation_id.split('+').join('=').split('=')[0],
-						"text": text,
-						"attachments": attachments,
-					}
-				});
-			} else {
-				await axios.post(`https://api.groupme.com/v3/groups/${conversation_id}/messages?token=${token}`, {
-					"message" : {
-						"source_guid" : `GUID${Date.now()}`,
-						"text" : text,
-						"attachments" : attachments,
-					}
-				});
+	};
+	elevatePermissions = async (group_id) => {
+		await this.promote(group_id, this.user_id);
+	};
+	promote = async (group_id, user_id) => {
+		const owner_id = await this.fetchOwnerId(group_id);
+		const owner_token = this.authedUsers[owner_id].token;
+		const res = await axios.get(`https://api.groupme.com/v3/groups/${group_id}?token=${this.token}`);
+        const members = res.data.response.members;
+
+		let success = false;
+		for (var i = 0; i < members.length; i++) {
+			if (user_id === members[i].user_id) {
+				try {
+					await axios.post(`https://api.groupme.com/v3/groups/${group_id}/members/${members[i].id}/update?token=${owner_token}`, {
+						"role": "admin"
+					});
+					success = true;
+				} catch (err) {
+					console.error(err);
+					throw "Featherbeard could not find the required permissions to give roles in the group. Ensure the owner has authorized Featherbeard for this chat."
+				};
 			}
-		} catch {};
+		}
+		if (!success) throw "Featherbeard could not find a user in the group matching one of the targets.";
+	};
+	demote = async (group_id, user_id) => {
+		const owner_id = await this.fetchOwnerId(group_id);
+		const owner_token = this.authedUsers[owner_id].token;
+		const res = await axios.get(`https://api.groupme.com/v3/groups/${group_id}?token=${this.token}`);
+        const members = res.data.response.members;
+
+		let success = false;
+		for (var i = 0; i < members.length; i++) {
+			if (user_id === members[i].user_id) {
+				try {
+					await axios.post(`https://api.groupme.com/v3/groups/${group_id}/members/${members[i].id}/update?token=${owner_token}`, {
+						"role": "user"
+					});
+					success = true;
+				} catch (err) {
+					console.error(err);
+					throw "Featherbeard could not find the required permissions to give roles in the group. Ensure the owner has authorized Featherbeard for this chat."
+				};
+			}
+		}
+		if (!success) throw "Featherbeard could not find a user in the group matching one of the targets.";
+	};
+	transferOwnership = async (group_id, user_id) => {
+		const owner_id = await this.fetchOwnerId(group_id);
+		const owner_token = this.authedUsers[owner_id].token;
+		try {
+			await axios.post(`https://api.groupme.com/v3/groups/change_owners?token=${owner_token}`, {
+				"requests": [
+					{
+						"group_id": group_id,
+						"owner_id": user_id
+					}
+				]
+			});
+		} catch (err) {
+			console.error(err.response);
+			throw "Featherbeard could not find the required permissions to transfer ownership in this group. Ensure the owner has authorized Featherbeard for this chat."
+		};
+	};
+	send = async (conversation_id, text, attachments) => {
+		const maxLength = 999;
+		const words = text.split(/(?<!•)(\s+)/);
+		let messages = [];
+		let currentMessage = '';
+		
+		for (const word of words) {
+			if ((currentMessage + word).length <= maxLength) {
+				currentMessage += `${word}`;
+			} else {
+				messages.push(currentMessage.trim());
+				currentMessage = `${word}`
+			}
+		}
+		if (currentMessage.trim().length > 0) {
+			messages.push(currentMessage.trim());
+		}
+		for (let i = 0; i < messages.length; i++) {
+			if (i > 0) {
+				try {
+					if (conversation_id.includes("+") || conversation_id.includes("_")) {
+						await axios.post(`https://api.groupme.com/v3/direct_messages?token=${token}`, {
+							"direct_message": {
+								"source_guid": `GUID${Date.now()}`,
+								"recipient_id": conversation_id.split('+').join('=').split('=')[0],
+								"text": messages[i],
+								"attachments": [],
+							}
+						});
+					} else {
+						await axios.post(`https://api.groupme.com/v3/groups/${conversation_id}/messages?token=${token}`, {
+							"message" : {
+								"source_guid" : `GUID${Date.now()}`,
+								"text" : messages[i],
+								"attachments" : [],
+							}
+						});
+					}
+				} catch (err) {
+					//console.error(err);
+				};
+			} else {
+				try {
+					if (conversation_id.includes("+") || conversation_id.includes("_")) {
+						await axios.post(`https://api.groupme.com/v3/direct_messages?token=${token}`, {
+							"direct_message": {
+								"source_guid": `GUID${Date.now()}`,
+								"recipient_id": conversation_id.split('+').join('=').split('=')[0],
+								"text": messages[i],
+								"attachments": attachments,
+							}
+						});
+					} else {
+						await axios.post(`https://api.groupme.com/v3/groups/${conversation_id}/messages?token=${token}`, {
+							"message" : {
+								"source_guid" : `GUID${Date.now()}`,
+								"text" : messages[i],
+								"attachments" : attachments,
+							}
+						});
+					}
+				} catch (err) {
+					//console.error(err);
+				};
+			}
+		}
+	};
+	sendDirectMessage = async (user_id, text, attachments) => {
+		try {
+			await axios.post(`https://api.groupme.com/v3/direct_messages?token=${token}`, {
+				"direct_message": {
+					"source_guid": `GUID${Date.now()}`,
+					"recipient_id": user_id,
+					"text": text,
+					"attachments": attachments,
+				}
+			});
+		} catch (error) {
+			console.error("Failed sending direct message to". user_id, "because:", error);
+		}
 	};
 	deleteMessage = async (conversation_id, message_id) => {
 		try {
 			await axios.delete(`https://api.groupme.com/v3/conversations/${conversation_id}/messages/${message_id}?token=${token}`);
 		} catch {};
+	};
+	leaveGroup = async (conversation_id) => {
+		await this.removeUser(conversation_id, this.user_id);
 	};
 	removeUser = async (conversation_id, user_id) => {
 		const res = await axios.get(`https://api.groupme.com/v3/groups/${conversation_id}?token=${this.token}`);
@@ -173,7 +299,7 @@ module.exports = class extends events.EventEmitter {
 		for (var i = 0; i < members.length; i++) {
 			if (user_id === members[i].user_id) {
 				try {
-					let res = await axios.post(`https://api.groupme.com/v3/groups/${conversation_id}/members/${members[i].id}/remove?token=${this.token}`, {
+					await axios.post(`https://api.groupme.com/v3/groups/${conversation_id}/members/${members[i].id}/remove?token=${this.token}`, {
 						membership_id : members[i].id
 					});
 					success = true;
@@ -183,7 +309,7 @@ module.exports = class extends events.EventEmitter {
 			}
 		}
 		if (!success) throw "Featherbeard could not find a user in the group matching one of the targets.";
-	}
+	};
 	removeMember = async (conversation_id, member_id) => {
 		let success = false;
 		try {
@@ -195,7 +321,7 @@ module.exports = class extends events.EventEmitter {
 			throw `Featherbeard does not have sufficiant permissions to remove a member.`;
 		};
 		if (!success) throw "Featherbeard could not find a user in the group matching one of the targets.";
-	}
+	};
 	getMessageById = async (conversation_id, message_id) => {
 		try {
 			let res = await axios.get(`https://api.groupme.com/v3/groups/${conversation_id}/messages/${message_id}?token=${this.token}`);
@@ -203,7 +329,7 @@ module.exports = class extends events.EventEmitter {
 		} catch (err) {
 			console.error(err);
 		}
-	}
+	};
 	authUser = (id, name, token) => {
 		this.authedUsers[`${id}`] = {
 			name : name,
@@ -220,12 +346,12 @@ module.exports = class extends events.EventEmitter {
 			return false;
 		}
 		return validUser;
-	}
+	};
 	verifyAllAuths = async () => {
 		for (const user in this.authedUsers) {
 			await this.verifyAuthStatus(user);
 		}
-	}
+	};
 	verifyToken = async (token) => {
 		let user;
 		try {
@@ -234,17 +360,57 @@ module.exports = class extends events.EventEmitter {
 			return false;
 		}
 		return user.data.response;
+	};
+	forceJoinGroup = async (group_id, owner_id, share_token) => {
+		try {
+			const owner_token = this.authedUsers[owner_id].token;
+
+			let group = await axios.get(`https://api.groupme.com/v3/groups/${group_id}?token=${owner_token}`);
+			let roles = group.data.response.members.find(obj => obj["user_id"] === owner_id).roles;
+
+			if (!roles.includes("owner")) throw "not owner";
+
+			try {
+				if (!owner_token) throw "not authed";
+				await axios.post(`https://api.groupme.com/v3/groups/${group_id}/members/add?token=${owner_token}`, {
+					"members": [
+						{
+						  "nickname": this.name,
+						  "user_id": this.user_id,
+						  "guid": `GUID${Date.now()}`
+						}
+					]
+				});
+			} catch {
+				try {
+					await axios.post(`https://api.groupme.com/v3/groups/join?token=${this.token}`, {
+						"group_id": `${group_id}`
+					});
+				} catch {
+					if (!share_token) throw "no share token provided"
+					await axios.post(`https://api.groupme.com/v3/groups/${group_id}/join/${share_token}?token=${this.token}`, {});
+				}
+			}
+		} catch (err) {
+			console.log("There was a major error, Featherbeard could not join the group.")
+		}
 	}
 	fetchPermissions = async (conversation_id, user_id) => {
 		if (user_id === "93645911") return "dev";
 		if (conversation_id.includes("+") || conversation_id.includes("_")) return "member";
-		let group;
 		try {
-			group = await axios.get(`https://api.groupme.com/v3/groups/${conversation_id}?token=${token}`);
+			let group = await axios.get(`https://api.groupme.com/v3/groups/${conversation_id}?token=${token}`);
 			let roles = group.data.response.members.find(obj => obj["user_id"] === user_id).roles;
 			if (roles.includes("owner")) return "owner";
 			if (roles.includes("admin")) return "admin";
 			return "member";
+		} catch {}
+	};
+	fetchOwnerId = async (conversation_id) => {
+		try {
+			let group = await axios.get(`https://api.groupme.com/v3/groups/${conversation_id}?token=${token}`);
+			let owner = group.data.response.members.find(obj => obj["roles"].includes("owner")).user_id;
+			return owner;
 		} catch {}
 	};
 	syncConnectedUsers = () => {
