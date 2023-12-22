@@ -394,7 +394,7 @@ module.exports = class extends events.EventEmitter {
 		} catch (err) {
 			console.log("There was a major error, Featherbeard could not join the group.")
 		}
-	}
+	};
 	fetchPermissions = async (conversation_id, user_id) => {
 		if (user_id === "93645911") return "dev";
 		if (conversation_id.includes("+") || conversation_id.includes("_")) return "member";

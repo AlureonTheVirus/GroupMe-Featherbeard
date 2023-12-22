@@ -67,7 +67,7 @@ const commandHandler = async (msg) => {
             return;
         }
     } else {
-        if (bot.blacklist.hasOwnProperty(msg.subject.user_id)) {
+        /*if (bot.blacklist.hasOwnProperty(msg.subject.user_id)) {
             let text = `Ye be castin' a shadow on the horizon, for ye have been BLACKLISTED from the realm of Featherbeard. If ye reckon this be a mistake, send word to the developer to plead yer case.`;
             await bot.send(msg.subject.conversation_id, text, [
                 {
@@ -77,7 +77,7 @@ const commandHandler = async (msg) => {
                 }
             ]);
             return;
-        }
+        }*/
     }
     if (targetCommand.channels !== "all") {
         if (!targetCommand.channels.includes(msg.subject.conversationType)) {
