@@ -235,7 +235,6 @@ async function CORSproxy(request) {
 
 function setCookie(name, value, daysToExpire) {
     var expires = '';
-  
     if (daysToExpire) {
       var date = new Date();
       date.setTime(date.getTime() + (daysToExpire * 24 * 60 * 60 * 1000));

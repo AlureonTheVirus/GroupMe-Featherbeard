@@ -5,7 +5,7 @@ module.exports = {
     usage : "!nuke",
     args : 0,
     roles : "dev",
-    channels : "all",
+    channels : "group",
     requiresAuth : 1,
     cooldown: 30000,
     execute : async (bot, args, msg) => {
@@ -15,7 +15,7 @@ module.exports = {
         let count = 0;
         let fails = 0;
         for (let i = 0; i < members.length; i++) {
-            if (members[i].user_id !== "116121837") {
+            if (members[i].user_id !== bot.user_id) {
                 try {
                     await bot.removeMember(msg.conversation_id, members[i].id);
                     count++;

@@ -1,8 +1,8 @@
 module.exports = {
-    description : "Kicks a member from the group via an @mention or a reply.",
-    usage : "!kick [@mention/reply]",
+    description : "Reverses !mute",
+    usage : "!unmute [@mention/reply]",
     args : 0,
-    roles : ["admin", "owner"],
+    roles : ["owner"],
     channels : "group",
     requiresAuth : 1,
     cooldown: 0,
@@ -33,30 +33,19 @@ module.exports = {
         ids = Array.from(ids, x => `${x}`);
 
         if (ids.includes(bot.user_id)) {
-            text = `Ye can't heave-ho Featherbeard off the plank of this here group. This ol' pengin pirate be stayin' put!`;
+            text = `Ye can't mute Featherbeard. This ol' pengin pirate be stayin' put!`;
             await bot.send(msg.conversation_id, text, []); 
-        }
+        };
 
-        let count = 0;
-        let fails = 0;
         for (let j = 0; j < ids.length; j++) {
-            try {
-                await bot.removeUser(msg.parent_id, ids[j]);
-                count++;
-            } catch (err) {
-                text = `Failure to remove because ${err}`;
+            if (bot.muted.includes(ids[j])) {
+                bot.muted.splice(bot.muted.indexOf(ids[j]), 1);
+                text = `Arrr! The member be unmuted successfully!`;
                 await bot.send(msg.conversation_id, text, []);
-                fails++;
-            }
-        }
-
-        if (fails > 0) {
-            if (fails > count) {
-                text = `Oi! There be some hiccups here. Make sure I boast admin permissions and give !kick another go.`;
+            } else {
+                text = `Arrrgh! The user ye be choosin' can't be unmuted! They never had the silence put upon 'em in the first place!`;
                 await bot.send(msg.conversation_id, text, []);
             }
-            text = `Alas ${fails} fellow sailors(s) resisted removal due to unforseen troubles on the high seas.`;
-            await bot.send(msg.conversation_id, text, []);
         }
     }
 };

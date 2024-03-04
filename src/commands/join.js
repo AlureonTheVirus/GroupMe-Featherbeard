@@ -28,7 +28,7 @@ module.exports = {
         
         try {
             await bot.forceJoinGroup(group_id, msg.sender_id, share_token);
-            let text = "I have joined your group. If you dont see me yet, double check that you are the owner of the group and see if you need to accept my membership.";
+            let text = "I have joined your group. If you dont see me yet, check for a membership request.";
             await bot.send(msg.conversation_id, text, [
                 {
                     "type": "reply",
@@ -37,7 +37,7 @@ module.exports = {
                 }
             ]);
         } catch (err) {
-            let text = "For whatever reason I was unable to join your group. Try again later.";
+            let text = "For whatever reason I was unable to join your group. Double check that you are the owner and try again later.";
             await bot.send(msg.conversation_id, text, [
                 {
                     "type": "reply",

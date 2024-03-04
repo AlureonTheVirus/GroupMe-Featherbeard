@@ -30,9 +30,8 @@ module.exports = {
                     }
                 }
             }
-            delete blacklist["118825642"]; // helperbot
-            delete blacklist[bot.user_id]; // sputnik
-            delete blacklist["117173298"]; // chey
+            delete blacklist["118825642"];
+            delete blacklist[bot.user_id];
         
         
             for (const user in authedUsers) {
@@ -65,7 +64,7 @@ module.exports = {
                             membership_id : members[i].id
                         });
 
-                        changes.push(`• Removed ${members[i].name}. Reason: ${blacklist[user].reason}.`);
+                        changes.push(`• Removed ${members[i].name}. Reason: ${blacklist[user].reason}`);
                         count++;
                     } catch {
                         changes.push(`• Failed to remove user: '${blacklist[user].name}'.`);

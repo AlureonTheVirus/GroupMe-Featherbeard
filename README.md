@@ -9,4 +9,3 @@ DM or reach out to me (Isaac Stanger) on GroupMe with any questions, feedback, o
 Right now the easiest way to get started with Featherbeard and add him to your groups is to authorize him as an application for your GroupMe accout. From there you will be forwarded to his share link where you can add him to whatever groups you like! (Make sure you give him admin permissions first)
 
 Visit https://featherbeard.alureon.dev/auth/ to authorize your account.
-

@@ -4,7 +4,7 @@ module.exports = {
     args : 1,
     roles : "all",
     channels : "group",
-    requiresAuth : 1,
+    requiresAuth : 0,
     cooldown: 5000,
     execute : async (bot, args, msg) => {
         const positive = [

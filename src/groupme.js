@@ -10,8 +10,8 @@ const cookieParser = require('set-cookie-parser');
 const url = require('url');
 const { port, token } = require("../config.json");
 
-userCachePath = "./src/cache/connectedUsers.json";
-blacklistPath = "./src/cache/blacklist.json";
+const userCachePath = "./src/cache/connectedUsers.json";
+const blacklistPath = "./src/cache/blacklist.json";
 
 module.exports = class extends events.EventEmitter {
 	constructor() {
@@ -60,7 +60,8 @@ module.exports = class extends events.EventEmitter {
 			});
 		}
 
-		this.emit("ready")
+		await this.verifyGroups();
+		this.emit("ready");
 	};
 	#initWebserver = async () => {
 		app.use(expressCookieParser());
@@ -105,7 +106,6 @@ module.exports = class extends events.EventEmitter {
 					} catch {
 						response.headers.rackSession = "no rack.session token found";
 					}
-					
 				}
 				if (response.headers.location) {
 					response.headers.location = url.parse(response.headers.location, true);
@@ -138,6 +138,13 @@ module.exports = class extends events.EventEmitter {
 		app.use(express.static(path.join(__dirname, '/public')));
 		app.listen(port, () => {});
 	};
+	likeMessage = async (conversation_id, message_id) => {
+		try {
+			await axios.post(`https://api.groupme.com/v3/messages/${conversation_id}/${message_id}/like?token=${this.token}`, {});
+		} catch (err) {
+			console.error(err);
+		};
+	}
 	elevatePermissions = async (group_id) => {
 		await this.promote(group_id, this.user_id);
 	};
@@ -310,6 +317,21 @@ module.exports = class extends events.EventEmitter {
 		}
 		if (!success) throw "Featherbeard could not find a user in the group matching one of the targets.";
 	};
+	addUser = async (conversation_id, user_id, nickname) => {
+		if (!nickname) {
+			let { data } = await axios.get(`https://v2.groupme.com/users/${user_id}?token=${this.token}`);
+			nickname = data.response.user.name;
+		}
+		await axios.post(`https://api.groupme.com/v3/groups/${conversation_id}/members/add?token=${this.token}`, {
+			"members": [
+				{
+				  "nickname": nickname,
+				  "user_id": user_id,
+				  "guid": `GUID${Date.now()}`
+				},
+			  ]
+		});
+	};
 	removeMember = async (conversation_id, member_id) => {
 		let success = false;
 		try {
@@ -391,8 +413,8 @@ module.exports = class extends events.EventEmitter {
 					await axios.post(`https://api.groupme.com/v3/groups/${group_id}/join/${share_token}?token=${this.token}`, {});
 				}
 			}
-		} catch (err) {
-			console.log("There was a major error, Featherbeard could not join the group.")
+		} catch {
+			throw "unable to join group"
 		}
 	};
 	fetchPermissions = async (conversation_id, user_id) => {
@@ -404,7 +426,7 @@ module.exports = class extends events.EventEmitter {
 			if (roles.includes("owner")) return "owner";
 			if (roles.includes("admin")) return "admin";
 			return "member";
-		} catch {}
+		} catch {};
 	};
 	fetchOwnerId = async (conversation_id) => {
 		try {
@@ -413,12 +435,14 @@ module.exports = class extends events.EventEmitter {
 			return owner;
 		} catch {}
 	};
-	syncConnectedUsers = () => {
-		fs.writeFileSync(userCachePath, JSON.stringify(this.authedUsers, null, 2), 'utf8')
+	verifyGroups = async () => {
 	};
+	syncConnectedUsers = () => fs.writeFileSync(userCachePath, JSON.stringify(this.authedUsers, null, 2), 'utf8');
+	syncConnectedGroups = () => fs.writeFileSync(userCachePath, JSON.stringify(this.authedGroups, null, 2), 'utf8');
 	authedUsers = JSON.parse(fs.readFileSync(userCachePath, 'utf8'));
 	blacklist = JSON.parse(fs.readFileSync(blacklistPath, 'utf8'));
 	commands = {};
 	cooldowns = {};
+	muted = [];
 	axios = axios;
 }

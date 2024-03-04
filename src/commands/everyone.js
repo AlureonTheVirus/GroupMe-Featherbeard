@@ -17,7 +17,7 @@ module.exports = {
 
         for (let i = 0; i < memberList.length; i++) {
             members.push(memberList[i].user_id);
-            loci.push([10, 18]);
+            loci.push([10, 9]);
         }
 
         await bot.send(msg.conversation_id, `Attention @everyone, ${msg.name} has made an announcement! Here it is:\n\n"${message}"`, [
