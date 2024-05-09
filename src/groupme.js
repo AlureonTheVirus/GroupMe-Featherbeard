@@ -325,6 +325,7 @@ module.exports = class extends events.EventEmitter {
 		let messages = [];
 		let currentMessage = '';
 		let res;
+		let final;
 		
 		for (const word of words) {
 			if ((currentMessage + word).length <= maxLength) {
@@ -358,10 +359,11 @@ module.exports = class extends events.EventEmitter {
 						}
 					});
 				}
+				if (i === 0) final = res.data.response.message;
 			} catch (err) {
 				console.error(err);
 			};
-			return res.data.response.message;
+			return final;
 		}
 	};
 	async sendDirectMessage(user_id, text, attachments) {
