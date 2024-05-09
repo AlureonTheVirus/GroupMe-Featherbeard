@@ -1,6 +1,7 @@
 const axios = require("axios");
 
 module.exports = {
+    alias : [],
     description : "Removes ALL members from a group.",
     usage : "!nuke",
     args : 0,

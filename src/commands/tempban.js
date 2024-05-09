@@ -1,4 +1,5 @@
 module.exports = {
+    alias : [],
     description : "Temporarily remove a user from the group, then add them back.",
     usage : "!tempban [@mention/reply] [y mo d h m s] [reason]",
     args : 1,

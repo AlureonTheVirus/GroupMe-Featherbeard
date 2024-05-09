@@ -1,4 +1,5 @@
 module.exports = {
+    alias : [],
     description : "Posts a lenny face.",
     usage : "!lenny",
     args : 0,

@@ -1,10 +1,11 @@
 module.exports = {
+    alias : [],
     description : "Reverses a group action via a reply to a system message.",
     usage : "!undo [reply]",
     args : 0,
     roles : ["admin", "owner"],
     channels : "group",
-    requiresAuth : 1,
+    requiresAuth : 0,
     cooldown: 0,
     execute : async (bot, args, msg) => {
         let reply = msg.attachments.find(o => o.type === 'reply');

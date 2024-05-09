@@ -1,8 +1,9 @@
 module.exports = {
+    alias : [],
     description : "Mutes a member so that any message they send is automatically deleted.",
     usage : "!mute [@mention/reply]",
     args : 0,
-    roles : ["owner"],
+    roles : "owner",
     channels : "group",
     requiresAuth : 1,
     cooldown: 0,

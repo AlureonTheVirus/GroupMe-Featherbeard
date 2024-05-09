@@ -6,19 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/css/pico/css/pico.min.css">
     <link rel="stylesheet" href="/css/custom.css">
-    <script src="/auth/index.js"></script>
+    <script src="/auth-v2/index.js"></script>
   </head>
 
-  <body onload="checkToken()">
+  <body>
     <header></header>
     <main class="container">
         <article>
           <hgroup>
-            <h1>Log in</h1>
+            <h1>Log in (v2)</h1>
             <br>
             <h2>Lets set sail! To begin, connect Featherbeard to your GroupMe account.</h2>
           </hgroup>
-          <form id="login-form" action="javascript:submit()">
+          <form id="login-form" action="javascript:submits()">
             <div>
               <label for="uname">Your GroupMe Email or Phone number</label>
               <input type="text" id="username" name="uname" placeholder="Email or Phone number" required>
@@ -61,7 +61,8 @@
         <form id="verify-form" action="javascript:verify()">
           <div class="container">
             <label for="pin"><b>Pin</b></label>
-            <input type="text" placeholder="pin" name="pin" required>
+            <input type="text" placeholder="pin" id="verify-box" name="pin" required>
+            <small id="incorrect-verify">Email/phone number or password is incorrect. Try again.</small>
             <button type="submit">Verify</button>
           </div>
         </form>

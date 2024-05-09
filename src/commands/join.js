@@ -1,4 +1,5 @@
 module.exports = {
+    alias : [],
     description : "Adds me to any of your chats with a link!",
     usage : "!join [group_share_link]",
     args : 0,

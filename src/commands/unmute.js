@@ -1,10 +1,11 @@
 module.exports = {
+    alias : [],
     description : "Reverses !mute",
     usage : "!unmute [@mention/reply]",
     args : 0,
     roles : ["owner"],
     channels : "group",
-    requiresAuth : 1,
+    requiresAuth : 0,
     cooldown: 0,
     execute : async (bot, args, msg) => {
         let attachments = msg.attachments;

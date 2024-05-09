@@ -1,10 +1,11 @@
 module.exports = {
+    alias : [],
     description : "Gives magical insight to mundane yes or no questions.",
     usage : "!8ball [question]",
     args : 1,
     roles : "all",
     channels : "group",
-    requiresAuth : 0,
+    requiresAuth : 1,
     cooldown: 5000,
     execute : async (bot, args, msg) => {
         const positive = [

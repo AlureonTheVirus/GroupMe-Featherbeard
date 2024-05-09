@@ -1,4 +1,5 @@
 module.exports = {
+    alias : [],
     description : "Shows this message.",
     usage : "!help",
     args : 0,
@@ -13,29 +14,31 @@ module.exports = {
 
         for (const command of commands) {
             if (bot.commands[command].channels === "all" || bot.commands[command].channels === msg.conversationType) {
-                if (senderRole === "dev") {
-                    if (bot.commands[command].roles !== "internal") {
-                        text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
-                    }
-                } else if (senderRole === "owner") {
-                    if (bot.commands[command].roles.includes("owner")) {
-                        text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
-                    } else if (bot.commands[command].roles.includes("admin")) {
-                        text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
-                    } else if (bot.commands[command].roles.includes("all")) {
-                        text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
-                    }
-                } else if (senderRole === "admin") {
-                    if (bot.commands[command].roles.includes("admin")) {
-                        text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
-                    } else if (bot.commands[command].roles.includes("all")) {
-                        text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
-                    }
-                } else {
-                    if (bot.commands[command].roles.includes("all")) {
-                        text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
-                    }
-                };
+                if (bot.commands[command].usage !== "!bonk") {
+                    if (senderRole === "dev") {
+                        if (bot.commands[command].roles !== "hidden") {
+                            text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
+                        }
+                    } else if (senderRole === "owner") {
+                        if (bot.commands[command].roles.includes("owner")) {
+                            text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
+                        } else if (bot.commands[command].roles.includes("admin")) {
+                            text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
+                        } else if (bot.commands[command].roles.includes("all")) {
+                            text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
+                        }
+                    } else if (senderRole === "admin") {
+                        if (bot.commands[command].roles.includes("admin")) {
+                            text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
+                        } else if (bot.commands[command].roles.includes("all")) {
+                            text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
+                        }
+                    } else {
+                        if (bot.commands[command].roles.includes("all")) {
+                            text.push(`• ${bot.commands[command].usage} - ${bot.commands[command].description}`);
+                        }
+                    };
+                }
             }
         };
 

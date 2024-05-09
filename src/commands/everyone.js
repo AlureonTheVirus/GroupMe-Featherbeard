@@ -1,6 +1,7 @@
 const axios = require("axios");
 
 module.exports = {
+    alias : [],
     description : "@mentions every user in the group for an announcment.",
     usage : "!everyone [message]",
     args : 0,

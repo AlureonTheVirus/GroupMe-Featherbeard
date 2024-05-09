@@ -1,4 +1,5 @@
 module.exports = {
+    alias : [],
     description : "Reboots Featherbeard in the case of a critical error.",
     usage : "!reboot",
     args : 0,

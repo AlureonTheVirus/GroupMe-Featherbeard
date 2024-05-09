@@ -38,10 +38,13 @@
     display: none;
 }
 
+#incorrect-verify {
+    display: none;
+}
+
 nav {
     background-color: #282828;
 }
-
 
 dialog {
     background-color: rgba(0, 0, 0, 0.5)

@@ -1,4 +1,5 @@
 module.exports = {
+    alias : [],
     description : "Kicks a member from the group via an @mention or a reply.",
     usage : "!kick [@mention/reply]",
     args : 0,
@@ -10,6 +11,11 @@ module.exports = {
         let attachments = msg.attachments;
         let ids = attachments.find(o => o.type === 'mentions');
         let reply = attachments.find(o => o.type === 'reply');
+
+
+        if (reply) {
+            await bot.deleteMessage(msg.conversation_id, reply.reply_id);
+        }
 
         if (ids) {
             ids = ids.user_ids;
@@ -32,9 +38,10 @@ module.exports = {
         }
         ids = Array.from(ids, x => `${x}`);
 
-        if (ids.includes(bot.user_id)) {
+        if (ids.includes(bot.getMemberId(msg.parent_id))) {
             text = `Ye can't heave-ho Featherbeard off the plank of this here group. This ol' pengin pirate be stayin' put!`;
-            await bot.send(msg.conversation_id, text, []); 
+            await bot.send(msg.conversation_id, text, []);
+            return;
         }
 
         let count = 0;

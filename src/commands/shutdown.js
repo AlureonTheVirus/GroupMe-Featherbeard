@@ -1,4 +1,5 @@
 module.exports = {
+    alias : [],
     description : "Kills Featherbeard in the case of a critical error. He will then need to be restarted manually",
     usage : "!shutdown",
     args : 0,

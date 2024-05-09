@@ -1,6 +1,7 @@
 const axios = require("axios");
 
 module.exports = {
+    alias : [],
     description : "Finds the Urban Dictionary defininition for a given word.",
     usage : "!ud [word]",
     args : 1,

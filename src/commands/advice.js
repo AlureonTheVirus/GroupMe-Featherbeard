@@ -1,23 +1,20 @@
 module.exports = {
     alias : [],
-    description : "Flips Featherbeard's lucky doubloon.",
-    usage : "!coinflip",
+    description : "Returns a slip of useful advice.",
+    usage : "!advice",
     args : 0,
     roles : "all",
     channels : "all",
-    requiresAuth : 0,
+    requiresAuth : 1,
     cooldown: 5000,
     execute : async (bot, args, msg) => {
-        let text = "Aye! It be TAILS!";
-        if (Math.random() >= .5) {
-            text = "Aye! It be HEADS!";
-        }
-        await bot.send(msg.conversation_id, text, [
+        const advice = await bot.axios.get("https://api.adviceslip.com/advice");
+        await bot.send(msg.conversation_id, await bot.pirateify(advice.data.slip.advice), [
             {
                 "type": "reply",
                 "reply_id": msg.id,
                 "base_reply_id": msg.id,
-            }
+            },
         ]);
     }
 };

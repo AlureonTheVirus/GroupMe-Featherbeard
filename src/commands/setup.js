@@ -1,4 +1,5 @@
 module.exports = {
+    alias : [],
     description : "Begins the process of adding Featherbeard to any of your groups",
     usage : "!setup",
     args : 0,

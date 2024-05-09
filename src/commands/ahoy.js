@@ -1,4 +1,5 @@
 module.exports = {
+    alias : ["ping"],
     description : "Tests if Featherbeard is awake and listening.",
     usage : "!ahoy",
     args : 0,

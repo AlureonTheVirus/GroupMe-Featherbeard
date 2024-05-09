@@ -1,4 +1,5 @@
 module.exports = {
+    alias : [],
     description : "Gives a role to a shipmate in the group.",
     usage : "!role [admin/owner/member] [@mention/reply]",
     args : 0,
