@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+
+  <head>
+    <title>Authorize Featherbeard with your account</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/pico/css/pico.min.css">
+    <link rel="stylesheet" href="/css/custom.css">
+    <script src="/auth-v2/index.js"></script>
+  </head>
+
+  <body>
+    <header></header>
+    <main class="container">
+        <article>
+          <hgroup>
+            <h1>Log in (v2)</h1>
+            <br>
+            <h2>Lets set sail! To begin, connect Featherbeard to your GroupMe account.</h2>
+          </hgroup>
+          <form id="login-form" action="javascript:submits()">
+            <div>
+              <label for="uname">Your GroupMe Email or Phone number</label>
+              <input type="text" id="username" name="uname" placeholder="Email or Phone number" required>
+            </div>
+            <div>
+              <label for="psw">Your GroupMe Password</label>
+              <input type="password" id="password" name="psw" placeholder="Password" required>
+            </div>
+              <label for="remember">
+                <input type="checkbox" role="switch" id="remember" name="remember" />
+                Remember me
+              </label>
+              <small id="incorrect-password">Email/phone number or password is incorrect. Try again.</small>
+              <br>
+              <button id="submit-button" type="submit">Authenticate</button>
+          </form>
+          <div>
+            <small>
+              You can always disconnect your account from Featherbeard at any time: <a href="#">Learn How</a>
+            </small>
+            <nav class="container">
+              <li><small><a href="/">Home</a></small></li>
+              <li><small>|</small></li> 
+              <li><small><a href="/about">About</a></small></li> 
+              <li><small>|</small></li> 
+              <li><small><a href="#">Terms</a></small></li>
+              <li><small>|</small></li> 
+              <li><small><a href="#">Privacy</a></small></li>
+            </nav>
+          </div>
+        </article>
+    </main>
+
+    <dialog id="verify-modal">
+      <article>
+        <hgroup>
+          <h1>Verify your account</h1>
+          <h2>Enter your 4-digit 2FA code to continue</h2>
+        </hgroup>
+        <form id="verify-form" action="javascript:verify()">
+          <div class="container">
+            <label for="pin"><b>Pin</b></label>
+            <input type="text" placeholder="pin" id="verify-box" name="pin" required>
+            <small id="incorrect-verify">Email/phone number or password is incorrect. Try again.</small>
+            <button type="submit">Verify</button>
+          </div>
+        </form>
+        <div>
+          <small>
+            Didn't get a text? <a href="javascript:sendAnotherText()">Try sending it again.</a>
+          </small>
+        </div>
+      </article>
+    </dialog>
+    <br>
+  </body>
+</html>

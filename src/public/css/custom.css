@@ -1,0 +1,74 @@
+:root {
+    --primary: #00bbff;
+    --primary-hover: #438ed5;
+    --background-color: #1a1a1a;
+    --line-height: 1.25;
+    --card-sectionning-background-color: #313131;
+}
+
+@media (min-width: 671px) {
+    article {
+        width: 55%;
+        margin: 0 auto;
+        background: #282828;
+    }
+
+    dialog article {
+        width: 42%;
+        margin: 0 auto;
+        background: #282828;
+    }
+}
+
+@media (max-width: 750px) {
+    article {
+        width: 100%;
+        margin: 0 auto;
+        background: #282828;
+    }
+
+    dialog article {
+        width: 100%;
+        margin: 0 auto;
+        background: #282828;
+    }
+}
+
+#incorrect-password {
+    display: none;
+}
+
+#incorrect-verify {
+    display: none;
+}
+
+nav {
+    background-color: #282828;
+}
+
+dialog {
+    background-color: rgba(0, 0, 0, 0.5)
+}
+
+body > footer, body > header, body > main, section {
+    --block-spacing-vertical: calc(var(--spacing)*1.75);
+    overflow: hidden;
+}
+
+.bottom-left-text {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-color: #282828;
+    padding: 7px;
+}
+
+input[type="text"], input[type="password"], textarea, input:autofill, input {
+    --background-color: #3f3f3f;
+    background: #3f3f3f;
+    filter: none;
+}
+
+[type="checkbox"][role="switch"] {
+    --background-color: #3f3f3f;
+}
